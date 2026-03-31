@@ -74,14 +74,8 @@ export default function Dashboard() {
       });
     });
 
-    // Process calls - only include inbound calls
+    // Process calls
     logs.calls.forEach((call) => {
-      // Filter to ensure only inbound calls are processed
-      if (call.direction !== 'inbound') {
-        console.log('[Dashboard] Skipping non-inbound call:', call.sid, call.direction);
-        return;
-      }
-
       const phone = call.to;
       if (!grouped.has(phone)) {
         grouped.set(phone, {

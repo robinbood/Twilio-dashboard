@@ -62,9 +62,60 @@ export const LogDetails = React.memo(({ calls, messages }: LogDetailsProps) => {
           </div>
         )}
 
-        {calls.length === 0 && (
+        {/* Messages Section */}
+        {messages.length > 0 && (
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3">
+              Message Logs ({messages.length})
+            </h3>
+            <div className="space-y-2">
+              {messages.map((message) => (
+                <div
+                  key={message.sid}
+                  className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4"
+                >
+                  <div className="flex items-start justify-between mb-2">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <Badge
+                          variant={
+                            message.status === 'delivered' ||
+                            message.status === 'received'
+                              ? 'success'
+                              : 'warning'
+                          }
+                          size="sm"
+                        >
+                          {message.status}
+                        </Badge>
+                        <Badge variant="default" size="sm">
+                          {message.direction}
+                        </Badge>
+                      </div>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        {formatDateTime(message.dateSent)}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="mb-2">
+                    <p className="text-gray-900 dark:text-gray-100 break-words">
+                      {message.body}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
+                    <span>From: {message.from}</span>
+                    <span>→</span>
+                    <span>To: {message.to}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {calls.length === 0 && messages.length === 0 && (
           <p className="text-center text-gray-600 dark:text-gray-400 py-4">
-            No calls available for this phone number
+            No logs available for this phone number
           </p>
         )}
       </div>
@@ -74,9 +125,14 @@ export const LogDetails = React.memo(({ calls, messages }: LogDetailsProps) => {
   console.log(`[LogDetails] Render completed in ${(endTime - startTime).toFixed(2)}ms`);
 }, (prevProps, nextProps) => {
   // Custom comparison function to prevent unnecessary re-renders
-  // Only re-render if calls change
+  // Only re-render if calls or messages change
   if (prevProps.calls !== nextProps.calls) {
     console.log('[LogDetails] Re-rendering: calls changed');
+    return false;
+  }
+
+  if (prevProps.messages !== nextProps.messages) {
+    console.log('[LogDetails] Re-rendering: messages changed');
     return false;
   }
 

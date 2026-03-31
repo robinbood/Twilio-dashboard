@@ -74,9 +74,14 @@ export const LogDetails = React.memo(({ calls, messages }: LogDetailsProps) => {
   console.log(`[LogDetails] Render completed in ${(endTime - startTime).toFixed(2)}ms`);
 }, (prevProps, nextProps) => {
   // Custom comparison function to prevent unnecessary re-renders
-  // Only re-render if calls change
+  // Only re-render if calls or messages change
   if (prevProps.calls !== nextProps.calls) {
     console.log('[LogDetails] Re-rendering: calls changed');
+    return false;
+  }
+
+  if (prevProps.messages !== nextProps.messages) {
+    console.log('[LogDetails] Re-rendering: messages changed');
     return false;
   }
 
