@@ -8,7 +8,7 @@ import { LoadingState } from './components/dashboard/LoadingState';
 import { EmptyState } from './components/dashboard/EmptyState';
 import { ErrorState } from './components/dashboard/ErrorState';
 import type { TwilioCall, TwilioMessage, GroupedLogEntry } from '@/types/dashboard';
-import type { FetchCallsResponse, FetchMessagesResponse, FetchNumbersResponse } from '@/types/api';
+import type { FetchCallsResponse, FetchMessagesResponse } from '@/types/api';
 
 export default function Dashboard() {
   // Diagnostic logging
@@ -48,10 +48,6 @@ export default function Dashboard() {
   // Error state
   const [error, setError] = useState<string | null>(null);
 
-  // Twilio numbers state
-  const [twilioNumbers, setTwilioNumbers] = useState<string[]>([]);
-  const [loadingNumbers, setLoadingNumbers] = useState(true);
-
   // Expanded rows state
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
 
@@ -62,17 +58,6 @@ export default function Dashboard() {
   // Group logs by Twilio phone number (the 'to' field for inbound communications)
   const groupedLogs = useMemo(() => {
     const grouped = new Map<string, GroupedLogEntry>();
-
-    // Initialize with ALL Twilio numbers (even those with zero activity)
-    twilioNumbers.forEach((phoneNumber) => {
-      grouped.set(phoneNumber, {
-        phoneNumber,
-        totalCalls: 0,
-        totalMessages: 0,
-        calls: [],
-        messages: [],
-      });
-    });
 
     // Process calls
     logs.calls.forEach((call) => {
@@ -113,7 +98,7 @@ export default function Dashboard() {
       (a, b) =>
         b.totalCalls + b.totalMessages - (a.totalCalls + a.totalMessages)
     );
-  }, [logs, twilioNumbers]);
+  }, [logs]);
 
   // Fetch logs from API
   const fetchLogs = useCallback(async () => {
@@ -165,34 +150,6 @@ export default function Dashboard() {
     }
   }, []); // Empty dependency array - fetchLogs is now stable
 
-  // Fetch Twilio numbers from API
-  const fetchTwilioNumbers = useCallback(async () => {
-    console.log('[Dashboard] fetchTwilioNumbers called');
-    setLoadingNumbers(true);
-    setError(null);
-
-    try {
-      const res = await fetch('/api/twilio/numbers');
-
-      if (!res.ok) {
-        throw new Error(`Failed to fetch Twilio numbers: ${res.status} ${res.statusText}`);
-      }
-
-      const data = (await res.json()) as FetchNumbersResponse;
-
-      if (!data.success) {
-        throw new Error(data.error);
-      }
-
-      setTwilioNumbers(data.data);
-      console.log('[Dashboard] Fetched Twilio numbers:', data.data);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch Twilio numbers');
-    } finally {
-      setLoadingNumbers(false);
-    }
-  }, []);
-
   // Toggle row expansion
   const toggleRow = useCallback((phoneNumber: string) => {
     console.log('[Dashboard] toggleRow called for:', phoneNumber);
@@ -236,20 +193,11 @@ export default function Dashboard() {
     }
   }, [dateRange, fetchLogs]); // Include fetchLogs in dependencies - now safe since fetchLogs is stable
 
-  // Fetch Twilio numbers on component mount
-  useEffect(() => {
-    console.log('[Dashboard] Fetching Twilio numbers on mount');
-    fetchTwilioNumbers();
-  }, [fetchTwilioNumbers]); // fetchTwilioNumbers is stable, safe to include
-
   // Check if loading
-  const isLoading = loading.calls || loading.messages || loadingNumbers;
+  const isLoading = loading.calls || loading.messages;
 
   // Check if there are logs
   const hasLogs = logs.calls.length > 0 || logs.messages.length > 0;
-
-  // Check if we have Twilio numbers to display
-  const hasNumbers = twilioNumbers.length > 0;
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -267,21 +215,14 @@ export default function Dashboard() {
           <ErrorState error={error} onRetry={fetchLogs} />
         )}
 
-        {!isLoading && !error && !hasNumbers && (
-          <EmptyState
-            message="No Twilio numbers found in your account"
-            onClearFilters={clearFilters}
-          />
-        )}
-
-        {!isLoading && !error && hasNumbers && !hasLogs && (
+        {!isLoading && !error && !hasLogs && (
           <EmptyState
             message="No logs found for the selected date range"
             onClearFilters={clearFilters}
           />
         )}
 
-        {!isLoading && !error && hasNumbers && (
+        {!isLoading && !error && hasLogs && (
           <LogsTable
             data={groupedLogs}
             expandedRows={memoizedExpandedRows}

@@ -13,7 +13,7 @@ export async function fetchMessagesFromTwilio(
   const { getTwilioClient } = await import('./client');
   const client = getTwilioClient();
 
-  const { startDate, endDate, limit = 1000, direction } = options;
+  const { startDate, endDate, limit = 1000 } = options;
 
   // Build filter parameters
   const params: Record<string, any> = {
@@ -26,10 +26,6 @@ export async function fetchMessagesFromTwilio(
 
   if (endDate) {
     params.dateSentBefore = new Date(endDate);
-  }
-
-  if (direction) {
-    params.direction = direction;
   }
 
   // Fetch messages from Twilio

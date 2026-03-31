@@ -73,21 +73,5 @@ export interface FetchMessagesSuccessResponse {
  */
 export type FetchMessagesResponse = FetchMessagesSuccessResponse | FetchErrorResponse;
 
-/**
- * Success response for fetching Twilio numbers
- */
-export interface FetchNumbersSuccessResponse {
-  success: true;
-  data: string[];
-  meta: {
-    total: number;
-  };
-}
-
-/**
- * Combined response type for fetching Twilio numbers
- */
-export type FetchNumbersResponse = FetchNumbersSuccessResponse | FetchErrorResponse;
-
 // Re-export dashboard types for convenience
 export type { TwilioCall, TwilioMessage, GroupedLogEntry } from './dashboard';

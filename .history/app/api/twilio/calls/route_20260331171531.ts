@@ -54,7 +54,6 @@ export async function GET(request: NextRequest) {
       startDate,
       endDate,
       limit,
-      direction: direction || undefined,
     });
 
     return NextResponse.json<FetchCallsResponse>({

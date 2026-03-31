@@ -28,10 +28,6 @@ export async function fetchMessagesFromTwilio(
     params.dateSentBefore = new Date(endDate);
   }
 
-  if (direction) {
-    params.direction = direction;
-  }
-
   // Fetch messages from Twilio
   const messages = await client.messages.list(params);
 

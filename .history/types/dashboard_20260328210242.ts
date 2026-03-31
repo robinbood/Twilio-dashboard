@@ -51,7 +51,7 @@ export interface TwilioMessage {
 }
 
 /**
- * Represents logs grouped by Twilio phone number (the 'to' field for inbound communications)
+ * Represents logs grouped by counterparty phone number
  */
 export interface GroupedLogEntry {
   phoneNumber: string;

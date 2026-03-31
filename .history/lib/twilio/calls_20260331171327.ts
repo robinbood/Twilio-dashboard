@@ -28,10 +28,6 @@ export async function fetchCallsFromTwilio(
     params.startTimeBefore = new Date(endDate);
   }
 
-  if (direction) {
-    params.direction = direction;
-  }
-
   // Fetch calls from Twilio
   const calls = await client.calls.list(params);
 

@@ -267,21 +267,14 @@ export default function Dashboard() {
           <ErrorState error={error} onRetry={fetchLogs} />
         )}
 
-        {!isLoading && !error && !hasNumbers && (
-          <EmptyState
-            message="No Twilio numbers found in your account"
-            onClearFilters={clearFilters}
-          />
-        )}
-
-        {!isLoading && !error && hasNumbers && !hasLogs && (
+        {!isLoading && !error && !hasLogs && (
           <EmptyState
             message="No logs found for the selected date range"
             onClearFilters={clearFilters}
           />
         )}
 
-        {!isLoading && !error && hasNumbers && (
+        {!isLoading && !error && hasLogs && (
           <LogsTable
             data={groupedLogs}
             expandedRows={memoizedExpandedRows}

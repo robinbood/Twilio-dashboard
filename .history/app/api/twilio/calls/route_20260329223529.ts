@@ -11,7 +11,6 @@ export async function GET(request: NextRequest) {
     const startDate = searchParams.get('startDate');
     const endDate = searchParams.get('endDate');
     const limit = parseInt(searchParams.get('limit') || '1000', 10);
-    const direction = searchParams.get('direction') as 'inbound' | 'outbound' | null;
 
     // Validate parameters
     if (startDate && !isValidDate(startDate)) {
@@ -42,19 +41,11 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    if (direction && direction !== 'inbound' && direction !== 'outbound') {
-      return NextResponse.json<FetchCallsResponse>(
-        { success: false, error: 'direction must be either "inbound" or "outbound"' },
-        { status: 400 }
-      );
-    }
-
     // Fetch calls from Twilio
     const calls = await fetchCallsFromTwilio({
       startDate,
       endDate,
       limit,
-      direction: direction || undefined,
     });
 
     return NextResponse.json<FetchCallsResponse>({

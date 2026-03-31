@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { fetchCallsFromTwilio } from '@/lib/twilio/calls';
+import { fetchMessagesFromTwilio } from '@/lib/twilio/messages';
 import { handleTwilioError } from '@/lib/twilio/error-handler';
 import { isValidDate, isValidLimit } from '@/lib/utils/validation';
-import type { FetchCallsResponse } from '@/types/api';
+import type { FetchMessagesResponse } from '@/types/api';
 
 export async function GET(request: NextRequest) {
   try {
@@ -15,54 +15,53 @@ export async function GET(request: NextRequest) {
 
     // Validate parameters
     if (startDate && !isValidDate(startDate)) {
-      return NextResponse.json<FetchCallsResponse>(
+      return NextResponse.json<FetchMessagesResponse>(
         { success: false, error: 'Invalid startDate format. Use YYYY-MM-DD' },
         { status: 400 }
       );
     }
 
     if (endDate && !isValidDate(endDate)) {
-      return NextResponse.json<FetchCallsResponse>(
+      return NextResponse.json<FetchMessagesResponse>(
         { success: false, error: 'Invalid endDate format. Use YYYY-MM-DD' },
         { status: 400 }
       );
     }
 
     if (startDate && endDate && new Date(startDate) > new Date(endDate)) {
-      return NextResponse.json<FetchCallsResponse>(
+      return NextResponse.json<FetchMessagesResponse>(
         { success: false, error: 'startDate cannot be after endDate' },
         { status: 400 }
       );
     }
 
     if (!isValidLimit(limit)) {
-      return NextResponse.json<FetchCallsResponse>(
+      return NextResponse.json<FetchMessagesResponse>(
         { success: false, error: 'limit must be between 1 and 10000' },
         { status: 400 }
       );
     }
 
     if (direction && direction !== 'inbound' && direction !== 'outbound') {
-      return NextResponse.json<FetchCallsResponse>(
+      return NextResponse.json<FetchMessagesResponse>(
         { success: false, error: 'direction must be either "inbound" or "outbound"' },
         { status: 400 }
       );
     }
 
-    // Fetch calls from Twilio
-    const calls = await fetchCallsFromTwilio({
+    // Fetch messages from Twilio
+    const messages = await fetchMessagesFromTwilio({
       startDate,
       endDate,
       limit,
-      direction: direction || undefined,
     });
 
-    return NextResponse.json<FetchCallsResponse>({
+    return NextResponse.json<FetchMessagesResponse>({
       success: true,
-      data: calls,
+      data: messages,
       meta: {
-        total: calls.length,
-        filtered: calls.length,
+        total: messages.length,
+        filtered: messages.length,
         dateRange: {
           from: startDate || 'all',
           to: endDate || 'all',
@@ -70,11 +69,11 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('[API Error] /api/twilio/calls:', error);
+    console.error('[API Error] /api/twilio/messages:', error);
 
     const twilioError = handleTwilioError(error);
 
-    return NextResponse.json<FetchCallsResponse>(
+    return NextResponse.json<FetchMessagesResponse>(
       {
         success: false,
         error: twilioError.message,

@@ -243,13 +243,10 @@ export default function Dashboard() {
   }, [fetchTwilioNumbers]); // fetchTwilioNumbers is stable, safe to include
 
   // Check if loading
-  const isLoading = loading.calls || loading.messages || loadingNumbers;
+  const isLoading = loading.calls || loading.messages;
 
   // Check if there are logs
   const hasLogs = logs.calls.length > 0 || logs.messages.length > 0;
-
-  // Check if we have Twilio numbers to display
-  const hasNumbers = twilioNumbers.length > 0;
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -267,21 +264,14 @@ export default function Dashboard() {
           <ErrorState error={error} onRetry={fetchLogs} />
         )}
 
-        {!isLoading && !error && !hasNumbers && (
-          <EmptyState
-            message="No Twilio numbers found in your account"
-            onClearFilters={clearFilters}
-          />
-        )}
-
-        {!isLoading && !error && hasNumbers && !hasLogs && (
+        {!isLoading && !error && !hasLogs && (
           <EmptyState
             message="No logs found for the selected date range"
             onClearFilters={clearFilters}
           />
         )}
 
-        {!isLoading && !error && hasNumbers && (
+        {!isLoading && !error && hasLogs && (
           <LogsTable
             data={groupedLogs}
             expandedRows={memoizedExpandedRows}
