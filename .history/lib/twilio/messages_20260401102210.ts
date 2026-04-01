@@ -5,6 +5,7 @@ export interface FetchMessagesOptions {
   endDate?: string | null;
   limit?: number;
   direction?: 'inbound' | 'outbound';
+  voipNumbers?: string[];
 }
 
 export async function fetchMessagesFromTwilio(
@@ -32,16 +33,8 @@ export async function fetchMessagesFromTwilio(
     params.direction = direction;
   }
 
-  console.log('[Twilio Messages] Fetching with params:', JSON.stringify(params, null, 2));
-
   // Fetch messages from Twilio
   const messages = await client.messages.list(params);
-
-  console.log('[Twilio Messages] Fetched', messages.length, 'messages');
-  if (messages.length > 0) {
-    console.log('[Twilio Messages] First message dateSent:', messages[0].dateSent?.toISOString());
-    console.log('[Twilio Messages] Last message dateSent:', messages[messages.length - 1].dateSent?.toISOString());
-  }
 
   // Transform to our TwilioMessage type
   return messages.map((message) => ({

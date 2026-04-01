@@ -83,23 +83,35 @@ export default function Dashboard() {
       }
 
       const phone = call.to;
-      // Only process calls to our Twilio numbers (already filtered at API level)
-      if (grouped.has(phone)) {
-        const entry = grouped.get(phone)!;
-        entry.totalCalls++;
-        entry.calls.push(call);
+      if (!grouped.has(phone)) {
+        grouped.set(phone, {
+          phoneNumber: phone,
+          totalCalls: 0,
+          totalMessages: 0,
+          calls: [],
+          messages: [],
+        });
       }
+      const entry = grouped.get(phone)!;
+      entry.totalCalls++;
+      entry.calls.push(call);
     });
 
     // Process messages
     logs.messages.forEach((message) => {
       const phone = message.to;
-      // Only process messages to our Twilio numbers (already filtered at API level)
-      if (grouped.has(phone)) {
-        const entry = grouped.get(phone)!;
-        entry.totalMessages++;
-        entry.messages.push(message);
+      if (!grouped.has(phone)) {
+        grouped.set(phone, {
+          phoneNumber: phone,
+          totalCalls: 0,
+          totalMessages: 0,
+          calls: [],
+          messages: [],
+        });
       }
+      const entry = grouped.get(phone)!;
+      entry.totalMessages++;
+      entry.messages.push(message);
     });
 
     // Convert to array and sort by total calls (descending)
@@ -121,6 +133,9 @@ export default function Dashboard() {
       if (currentDateRange.from) params.append('startDate', currentDateRange.from);
       if (currentDateRange.to) params.append('endDate', currentDateRange.to);
       params.append('direction', 'inbound');
+      if (twilioNumbers.length > 0) {
+        params.append('voipNumbers', twilioNumbers.join(','));
+      }
 
       // Fetch calls and messages in parallel
       const [callsRes, messagesRes] = await Promise.all([

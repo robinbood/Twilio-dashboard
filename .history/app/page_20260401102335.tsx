@@ -121,6 +121,9 @@ export default function Dashboard() {
       if (currentDateRange.from) params.append('startDate', currentDateRange.from);
       if (currentDateRange.to) params.append('endDate', currentDateRange.to);
       params.append('direction', 'inbound');
+      if (twilioNumbers.length > 0) {
+        params.append('voipNumbers', twilioNumbers.join(','));
+      }
 
       // Fetch calls and messages in parallel
       const [callsRes, messagesRes] = await Promise.all([

@@ -5,6 +5,7 @@ export interface FetchCallsOptions {
   endDate?: string | null;
   limit?: number;
   direction?: 'inbound' | 'outbound';
+  voipNumbers?: string[];
 }
 
 export async function fetchCallsFromTwilio(
@@ -13,7 +14,7 @@ export async function fetchCallsFromTwilio(
   const { getTwilioClient } = await import('./client');
   const client = getTwilioClient();
 
-  const { startDate, endDate, limit = 1000, direction } = options;
+  const { startDate, endDate, limit = 1000, direction, voipNumbers } = options;
 
   // Build filter parameters
   const params: Record<string, any> = {
@@ -32,16 +33,12 @@ export async function fetchCallsFromTwilio(
     params.direction = direction;
   }
 
-  console.log('[Twilio Calls] Fetching with params:', JSON.stringify(params, null, 2));
+  if (voipNumbers && voipNumbers.length > 0) {
+    params.to = voipNumbers.join(',');
+  }
 
   // Fetch calls from Twilio
   const calls = await client.calls.list(params);
-
-  console.log('[Twilio Calls] Fetched', calls.length, 'calls');
-  if (calls.length > 0) {
-    console.log('[Twilio Calls] First call startTime:', calls[0].startTime?.toISOString());
-    console.log('[Twilio Calls] Last call startTime:', calls[calls.length - 1].startTime?.toISOString());
-  }
 
   // Transform to our TwilioCall type
   return calls.map((call) => ({
